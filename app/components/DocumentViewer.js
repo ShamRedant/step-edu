@@ -388,11 +388,14 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
 
   // PDF Viewer
   if (fileExt === 'pdf') {
+    // Build PDF URL with parameters
+    const pdfUrl = `${filePath}${shouldBlockCopy ? "#toolbar=0&navpanes=0" : !shouldBlockDownload ? "#toolbar=0&navpanes=0" : "#toolbar=0"}`;
+    
     return (
       <div ref={containerRef} className="h-full w-full bg-slate-100 relative overflow-auto" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
         {shouldBlockCopy && (
           <>
-            {/* Protection overlay - blocks all interactions except iframe */}
+            {/* Protection overlay - blocks all interactions except PDF viewer */}
             <div
               className="absolute inset-0 z-30 pointer-events-none"
               style={{
@@ -413,27 +416,37 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
           </>
         )}
 
-        <iframe
-          src={`${filePath}#toolbar=0${shouldBlockCopy ? "&navpanes=0&toolbar=0" : !shouldBlockDownload ? "&navpanes=0" : ""}`}
-          className="w-full h-full border-0"
+        {/* Use object/embed for Chrome compatibility (Chrome blocks PDFs in iframes with sandbox) */}
+        <object
+          data={pdfUrl}
+          type="application/pdf"
+          className="w-full h-full border-0 relative z-10"
           style={{
             pointerEvents: "auto",
             userSelect: "none",
             WebkitUserSelect: "none",
             overflow: "auto",
             touchAction: "pan-x pan-y pinch-zoom",
+            minHeight: "100%",
           }}
-          sandbox={
-            shouldBlockCopy
-              ? "allow-same-origin allow-scripts"
-              : shouldBlockDownload
-              ? "allow-same-origin allow-scripts"
-              : "allow-same-origin allow-scripts allow-downloads"
-          }
           title="PDF Viewer"
-          allow="fullscreen"
           onContextMenu={(e) => shouldBlockCopy && e.preventDefault()}
-        />
+        >
+          {/* Fallback embed for browsers that don't support object */}
+          <embed
+            src={pdfUrl}
+            type="application/pdf"
+            className="w-full h-full border-0"
+            style={{
+              pointerEvents: "auto",
+              userSelect: "none",
+              WebkitUserSelect: "none",
+              minHeight: "100%",
+            }}
+            title="PDF Viewer"
+            onContextMenu={(e) => shouldBlockCopy && e.preventDefault()}
+          />
+        </object>
 
         {!shouldBlockDownload && (
           <div className="absolute top-4 right-4 z-20">
