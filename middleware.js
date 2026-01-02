@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
+/**
+ * Middleware for Admin route protection
+ */
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
@@ -19,10 +22,9 @@ export async function middleware(req) {
     }
 
     try {
-      const secret = new TextEncoder().encode(
-        process.env.JWT_SECRET || ""
-      );
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       await jwtVerify(token, secret);
+      return NextResponse.next();
     } catch {
       return NextResponse.json(
         { message: "Invalid token" },
@@ -33,22 +35,30 @@ export async function middleware(req) {
 
   if (pathname.startsWith("/admin") && pathname !== "/admin") {
     if (!token) {
-      return NextResponse.redirect(new URL("/admin", req.url));
+      const loginUrl = new URL("/admin", req.url);
+      return NextResponse.redirect(loginUrl);
     }
 
     try {
-      const secret = new TextEncoder().encode(
-        process.env.JWT_SECRET || ""
-      );
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       await jwtVerify(token, secret);
+      return NextResponse.next();
     } catch {
-      return NextResponse.redirect(new URL("/admin", req.url));
+      const loginUrl = new URL("/admin", req.url);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
   return NextResponse.next();
 }
 
+/**
+ * ✅ Correct matcher (IMPORTANT)
+ * Covers BOTH admin pages & admin APIs
+ */
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/api/admin/:path*",
+  ],
 };

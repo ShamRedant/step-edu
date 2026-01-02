@@ -78,6 +78,7 @@ function ViewerContent() {
           fileType={fileType}
           allowDownload={allowDownload}
           isTeacher={isTeacher}
+          fileCategory={fileCategory}
         />
       </div>
     </div>

@@ -1,68 +1,81 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-export default function DocumentViewer({ filePath, fileType, allowDownload = false, isTeacher = false }) {
+export default function DocumentViewer({ filePath, fileType, allowDownload = false, isTeacher = false, fileCategory = "" }) {
   const containerRef = useRef(null);
   const [fileContent, setFileContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fileExt = fileType?.toLowerCase() || filePath?.split('.').pop()?.toLowerCase() || '';
+  
+  // Determine restrictions based on file category and type
+  const isPPTFile = fileExt === 'ppt' || fileExt === 'pptx';
+  const isStudentFile = fileCategory === 'student';
+  const shouldBlockDownload = isTeacher || isStudentFile || isPPTFile;
+  const shouldBlockCopy = isTeacher || isStudentFile || isPPTFile; // Block copy for teacher, student, and PPT files
+  const shouldBlockScreenshot = isTeacher; // Only block screenshots for teacher files
 
   useEffect(() => {
-    if (!isTeacher) return;
+    // Only apply full protection when copy should be blocked
+    if (!shouldBlockCopy) return;
+
+    const container = containerRef.current;
+    if (!container) return;
 
     // Disable right-click context menu
     const handleContextMenu = (e) => {
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
-      alert("Right-click is disabled for protected content");
       return false;
     };
 
-    // Comprehensive keyboard shortcuts blocking
+    // Comprehensive keyboard shortcuts blocking - improved for Windows and Mac
     const handleKeyDown = (e) => {
-      // Block Print Screen, Screenshot shortcuts
+      const key = e.key.toLowerCase();
+      const isCtrl = e.ctrlKey || e.metaKey; // Support both Ctrl (Windows) and Cmd (Mac)
+      const isShift = e.shiftKey;
+      
+      // Block Copy (Ctrl+C / Cmd+C)
+      if (isCtrl && key === 'c') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+      
+      // Block Select All (Ctrl+A / Cmd+A)
+      if (isCtrl && key === 'a') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+      
+      // Block Cut (Ctrl+X / Cmd+X)
+      if (isCtrl && key === 'x') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+      
+      // Block other shortcuts
       if (
         e.key === "PrintScreen" ||
-        (e.key === "F12") ||
-        (e.ctrlKey && e.shiftKey && e.key === "I") || // DevTools
-        (e.ctrlKey && e.shiftKey && e.key === "C") || // DevTools Console
-        (e.ctrlKey && e.shiftKey && e.key === "J") || // DevTools Console
-        (e.ctrlKey && e.shiftKey && e.key === "K") || // DevTools Console
-        (e.ctrlKey && e.key === "u") || // View Source
-        (e.ctrlKey && e.key === "U") || // View Source
-        (e.ctrlKey && e.key === "s") || // Save
-        (e.ctrlKey && e.key === "S") || // Save
-        (e.ctrlKey && e.key === "p") || // Print
-        (e.ctrlKey && e.key === "P") || // Print
-        (e.ctrlKey && e.key === "a") || // Select All
-        (e.ctrlKey && e.key === "A") || // Select All
-        (e.ctrlKey && e.key === "c") || // Copy
-        (e.ctrlKey && e.key === "C") || // Copy
-        (e.ctrlKey && e.key === "x") || // Cut
-        (e.ctrlKey && e.key === "X") || // Cut
-        (e.ctrlKey && e.key === "v") || // Paste
-        (e.ctrlKey && e.key === "V") || // Paste
-        (e.metaKey && e.key === "s") || // Mac Save
-        (e.metaKey && e.key === "S") || // Mac Save
-        (e.metaKey && e.key === "p") || // Mac Print
-        (e.metaKey && e.key === "P") || // Mac Print
-        (e.metaKey && e.key === "a") || // Mac Select All
-        (e.metaKey && e.key === "A") || // Mac Select All
-        (e.metaKey && e.key === "c") || // Mac Copy
-        (e.metaKey && e.key === "C") || // Mac Copy
-        (e.metaKey && e.key === "x") || // Mac Cut
-        (e.metaKey && e.key === "X") || // Mac Cut
-        (e.key === "F5") || // Refresh (to prevent reload)
-        (e.ctrlKey && e.key === "r") || // Refresh
-        (e.ctrlKey && e.key === "R") || // Refresh
-        (e.ctrlKey && e.shiftKey && e.key === "R") || // Hard Refresh (Ctrl+Shift+R)
-        (e.ctrlKey && e.shiftKey && e.key === "r") || // Hard Refresh (Ctrl+Shift+r)
-        (e.metaKey && e.shiftKey && e.key === "R") || // Mac Hard Refresh (Cmd+Shift+R)
-        (e.metaKey && e.shiftKey && e.key === "r") || // Mac Hard Refresh (Cmd+Shift+r)
-        (e.shiftKey && (e.key === "R" || e.key === "r") && (e.getModifierState("Meta") || e.getModifierState("OSLeft") || e.getModifierState("OSRight"))) // Windows Win+Shift+R
+        e.key === "F12" ||
+        (isCtrl && isShift && key === 'i') || // DevTools
+        (isCtrl && isShift && key === 'c') || // DevTools Console
+        (isCtrl && isShift && key === 'j') || // DevTools Console
+        (isCtrl && isShift && key === 'k') || // DevTools Console
+        (isCtrl && key === 'u') || // View Source
+        (isCtrl && key === 's') || // Save
+        (isCtrl && key === 'p') || // Print
+        (isCtrl && key === 'v') || // Paste
+        e.key === "F5" ||
+        (isCtrl && key === 'r') ||
+        (isCtrl && isShift && key === 'r')
       ) {
         e.preventDefault();
         e.stopPropagation();
@@ -71,11 +84,29 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
       }
     };
 
-    // Disable text selection
+    // Disable text selection - multiple handlers for better coverage
     const handleSelectStart = (e) => {
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
       return false;
+    };
+
+    const handleSelect = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.getSelection()?.removeAllRanges();
+      return false;
+    };
+
+    const handleMouseUp = (e) => {
+      // Clear any selection that might have occurred
+      if (window.getSelection) {
+        const selection = window.getSelection();
+        if (selection && selection.toString().length > 0) {
+          selection.removeAllRanges();
+        }
+      }
     };
 
     // Disable drag and drop
@@ -97,12 +128,19 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
       return false;
     };
 
-    // Disable copy
+    // Disable copy - multiple handlers for better coverage
     const handleCopy = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      e.clipboardData.setData("text/plain", "");
-      alert("Copying is disabled for protected content");
+      e.stopImmediatePropagation();
+      if (e.clipboardData) {
+        e.clipboardData.setData("text/plain", "");
+        e.clipboardData.setData("text/html", "");
+      }
+      // Clear any selection
+      if (window.getSelection) {
+        window.getSelection()?.removeAllRanges();
+      }
       return false;
     };
 
@@ -131,7 +169,16 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
     const handleMouseDown = (e) => {
       if (e.button === 2) { // Right click
         e.preventDefault();
+        e.stopPropagation();
         return false;
+      }
+      // Prevent text selection on double-click
+      if (e.detail === 2) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.getSelection) {
+          window.getSelection()?.removeAllRanges();
+        }
       }
     };
 
@@ -143,17 +190,26 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
       }
     };
 
-    // Add all event listeners with capture phase
-    document.addEventListener("contextmenu", handleContextMenu, { capture: true, passive: false });
-    document.addEventListener("keydown", handleKeyDown, { capture: true, passive: false });
-    document.addEventListener("selectstart", handleSelectStart, { capture: true, passive: false });
-    document.addEventListener("dragstart", handleDragStart, { capture: true, passive: false });
-    document.addEventListener("drag", handleDrag, { capture: true, passive: false });
-    document.addEventListener("dragend", handleDragEnd, { capture: true, passive: false });
-    document.addEventListener("copy", handleCopy, { capture: true, passive: false });
-    document.addEventListener("cut", handleCut, { capture: true, passive: false });
-    document.addEventListener("paste", handlePaste, { capture: true, passive: false });
-    document.addEventListener("mousedown", handleMouseDown, { capture: true, passive: false });
+    // Add all event listeners with capture phase - attach to both document, window, and container
+    const addListeners = (target) => {
+      target.addEventListener("contextmenu", handleContextMenu, { capture: true, passive: false });
+      target.addEventListener("keydown", handleKeyDown, { capture: true, passive: false });
+      target.addEventListener("selectstart", handleSelectStart, { capture: true, passive: false });
+      target.addEventListener("select", handleSelect, { capture: true, passive: false });
+      target.addEventListener("dragstart", handleDragStart, { capture: true, passive: false });
+      target.addEventListener("drag", handleDrag, { capture: true, passive: false });
+      target.addEventListener("dragend", handleDragEnd, { capture: true, passive: false });
+      target.addEventListener("copy", handleCopy, { capture: true, passive: false });
+      target.addEventListener("cut", handleCut, { capture: true, passive: false });
+      target.addEventListener("paste", handlePaste, { capture: true, passive: false });
+      target.addEventListener("mousedown", handleMouseDown, { capture: true, passive: false });
+      target.addEventListener("mouseup", handleMouseUp, { capture: true, passive: false });
+    };
+
+    // Add listeners to document, window, and container
+    addListeners(document);
+    addListeners(window);
+    addListeners(container);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     
     // Prevent image dragging
@@ -167,18 +223,22 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
     const style = document.createElement("style");
     style.id = "teacher-file-protection";
     style.textContent = `
-      * {
+      /* Prevent text selection everywhere except iframes */
+      *:not(iframe):not(iframe *) {
         -webkit-user-select: none !important;
         -moz-user-select: none !important;
         -ms-user-select: none !important;
         user-select: none !important;
         -webkit-touch-callout: none !important;
+      }
+      
+      /* Prevent dragging */
+      *:not(iframe) {
         -webkit-user-drag: none !important;
         -khtml-user-drag: none !important;
         -moz-user-drag: none !important;
         -o-user-drag: none !important;
         user-drag: none !important;
-        pointer-events: auto !important;
       }
       
       img {
@@ -190,13 +250,37 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
         pointer-events: none !important;
       }
       
+      /* Allow iframe interactions (scrolling, clicking, zooming) */
       iframe {
         pointer-events: auto !important;
         overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y pinch-zoom !important;
+        user-select: none !important;
       }
       
-      /* Allow scrolling and zooming on document containers */
-      [class*="h-full"], [class*="overflow"] {
+      /* Allow scrolling and clicking on document containers */
+      div[class*="h-full"],
+      div[class*="overflow"],
+      div[class*="overflow-auto"],
+      div[class*="bg-slate-100"],
+      div[class*="bg-white"],
+      div[ref] {
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y pinch-zoom !important;
+        pointer-events: auto !important;
+        cursor: default !important;
+      }
+      
+      /* Ensure containers allow scrolling */
+      [class*="relative"] {
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      
+      /* Allow mouse wheel scrolling on body */
+      body {
         overflow: auto !important;
         -webkit-overflow-scrolling: touch !important;
       }
@@ -235,16 +319,26 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
     document.body.appendChild(watermark);
 
     return () => {
-      document.removeEventListener("contextmenu", handleContextMenu, { capture: true });
-      document.removeEventListener("keydown", handleKeyDown, { capture: true });
-      document.removeEventListener("selectstart", handleSelectStart, { capture: true });
-      document.removeEventListener("dragstart", handleDragStart, { capture: true });
-      document.removeEventListener("drag", handleDrag, { capture: true });
-      document.removeEventListener("dragend", handleDragEnd, { capture: true });
-      document.removeEventListener("copy", handleCopy, { capture: true });
-      document.removeEventListener("cut", handleCut, { capture: true });
-      document.removeEventListener("paste", handlePaste, { capture: true });
-      document.removeEventListener("mousedown", handleMouseDown, { capture: true });
+      const removeListeners = (target) => {
+        target.removeEventListener("contextmenu", handleContextMenu, { capture: true });
+        target.removeEventListener("keydown", handleKeyDown, { capture: true });
+        target.removeEventListener("selectstart", handleSelectStart, { capture: true });
+        target.removeEventListener("select", handleSelect, { capture: true });
+        target.removeEventListener("dragstart", handleDragStart, { capture: true });
+        target.removeEventListener("drag", handleDrag, { capture: true });
+        target.removeEventListener("dragend", handleDragEnd, { capture: true });
+        target.removeEventListener("copy", handleCopy, { capture: true });
+        target.removeEventListener("cut", handleCut, { capture: true });
+        target.removeEventListener("paste", handlePaste, { capture: true });
+        target.removeEventListener("mousedown", handleMouseDown, { capture: true });
+        target.removeEventListener("mouseup", handleMouseUp, { capture: true });
+      };
+
+      removeListeners(document);
+      removeListeners(window);
+      if (container) {
+        removeListeners(container);
+      }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       
       images.forEach(img => {
@@ -257,7 +351,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
       const watermarkEl = document.getElementById("teacher-file-watermark");
       if (watermarkEl) document.body.removeChild(watermarkEl);
     };
-  }, [isTeacher]);
+  }, [shouldBlockCopy]);
 
   // Load CSV content for table display
   useEffect(() => {
@@ -286,7 +380,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
   if (fileExt === 'pdf') {
     return (
       <div ref={containerRef} className="h-full w-full bg-slate-100 relative overflow-auto" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-        {isTeacher && (
+        {shouldBlockCopy && (
           <>
             {/* Protection overlay - blocks all interactions except iframe */}
             <div
@@ -310,7 +404,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
         )}
 
         <iframe
-          src={`${filePath}#toolbar=0${isTeacher ? "&navpanes=0&toolbar=0" : !allowDownload ? "&navpanes=0" : ""}`}
+          src={`${filePath}#toolbar=0${shouldBlockCopy ? "&navpanes=0&toolbar=0" : !shouldBlockDownload ? "&navpanes=0" : ""}`}
           className="w-full h-full border-0"
           style={{
             pointerEvents: "auto",
@@ -320,18 +414,18 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
             touchAction: "pan-x pan-y pinch-zoom",
           }}
           sandbox={
-            isTeacher
+            shouldBlockCopy
               ? "allow-same-origin allow-scripts"
-              : allowDownload
-              ? "allow-same-origin allow-scripts allow-downloads"
-              : "allow-same-origin allow-scripts"
+              : shouldBlockDownload
+              ? "allow-same-origin allow-scripts"
+              : "allow-same-origin allow-scripts allow-downloads"
           }
           title="PDF Viewer"
           allow="fullscreen"
-          onContextMenu={(e) => isTeacher && e.preventDefault()}
+          onContextMenu={(e) => shouldBlockCopy && e.preventDefault()}
         />
 
-        {allowDownload && !isTeacher && (
+        {!shouldBlockDownload && (
           <div className="absolute top-4 right-4 z-20">
             <a
               href={filePath}
@@ -368,7 +462,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
     
     return (
       <div ref={containerRef} className="h-full w-full bg-slate-100 relative overflow-auto" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-        {isTeacher && (
+        {shouldBlockCopy && (
           <>
             <div
               className="absolute inset-0 z-30 pointer-events-none"
@@ -399,12 +493,12 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
             overflow: "auto",
             touchAction: "pan-x pan-y pinch-zoom",
           }}
-          sandbox={isTeacher ? "allow-same-origin allow-scripts" : "allow-same-origin allow-scripts"}
+          sandbox={shouldBlockCopy ? "allow-same-origin allow-scripts" : shouldBlockDownload ? "allow-same-origin allow-scripts" : "allow-same-origin allow-scripts allow-downloads"}
           title="Word Document Viewer"
-          onContextMenu={(e) => isTeacher && e.preventDefault()}
+          onContextMenu={(e) => shouldBlockCopy && e.preventDefault()}
         />
 
-        {allowDownload && !isTeacher && (
+        {!shouldBlockDownload && (
           <div className="absolute top-4 right-4 z-20">
             <a
               href={filePath}
@@ -419,13 +513,27 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
           </div>
         )}
 
-        {isTeacher && (
+        {shouldBlockCopy && (
           <div className="absolute bottom-4 left-4 right-4 z-40 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Protected Content: View Only - Downloading, copying, and screenshots are disabled</span>
+              <span>
+                {isTeacher 
+                  ? "Protected Content: View Only - Downloading, copying, and screenshots are disabled"
+                  : "Download and copy are disabled for this file"}
+              </span>
+            </div>
+          </div>
+        )}
+        {shouldBlockDownload && !shouldBlockCopy && (
+          <div className="absolute bottom-4 left-4 right-4 z-40 bg-amber-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Download is disabled for this file</span>
             </div>
           </div>
         )}
@@ -441,7 +549,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
     
     return (
       <div ref={containerRef} className="h-full w-full bg-slate-100 relative overflow-auto" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-        {isTeacher && (
+        {shouldBlockCopy && (
           <>
             <div
               className="absolute inset-0 z-30 pointer-events-none"
@@ -472,12 +580,12 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
             overflow: "auto",
             touchAction: "pan-x pan-y pinch-zoom",
           }}
-          sandbox={isTeacher ? "allow-same-origin allow-scripts" : "allow-same-origin allow-scripts"}
+          sandbox={shouldBlockCopy ? "allow-same-origin allow-scripts" : shouldBlockDownload ? "allow-same-origin allow-scripts" : "allow-same-origin allow-scripts allow-downloads"}
           title="Excel Spreadsheet Viewer"
-          onContextMenu={(e) => isTeacher && e.preventDefault()}
+          onContextMenu={(e) => shouldBlockCopy && e.preventDefault()}
         />
 
-        {allowDownload && !isTeacher && (
+        {!shouldBlockDownload && (
           <div className="absolute top-4 right-4 z-20">
             <a
               href={filePath}
@@ -492,13 +600,27 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
           </div>
         )}
 
-        {isTeacher && (
+        {shouldBlockCopy && (
           <div className="absolute bottom-4 left-4 right-4 z-40 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Protected Content: View Only - Downloading, copying, and screenshots are disabled</span>
+              <span>
+                {isTeacher 
+                  ? "Protected Content: View Only - Downloading, copying, and screenshots are disabled"
+                  : "Download and copy are disabled for this file"}
+              </span>
+            </div>
+          </div>
+        )}
+        {shouldBlockDownload && !shouldBlockCopy && (
+          <div className="absolute bottom-4 left-4 right-4 z-40 bg-amber-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Download is disabled for this file</span>
             </div>
           </div>
         )}
@@ -514,7 +636,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
     
     return (
       <div ref={containerRef} className="h-full w-full bg-slate-100 relative overflow-auto" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-        {isTeacher && (
+        {shouldBlockCopy && (
           <>
             <div
               className="absolute inset-0 z-30 pointer-events-none"
@@ -545,12 +667,12 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
             overflow: "auto",
             touchAction: "pan-x pan-y pinch-zoom",
           }}
-          sandbox={isTeacher ? "allow-same-origin allow-scripts" : "allow-same-origin allow-scripts"}
+          sandbox={shouldBlockCopy ? "allow-same-origin allow-scripts" : shouldBlockDownload ? "allow-same-origin allow-scripts" : "allow-same-origin allow-scripts allow-downloads"}
           title="PowerPoint Presentation Viewer"
-          onContextMenu={(e) => isTeacher && e.preventDefault()}
+          onContextMenu={(e) => shouldBlockCopy && e.preventDefault()}
         />
 
-        {allowDownload && !isTeacher && (
+        {!shouldBlockDownload && (
           <div className="absolute top-4 right-4 z-20">
             <a
               href={filePath}
@@ -565,13 +687,27 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
           </div>
         )}
 
-        {isTeacher && (
+        {shouldBlockCopy && (
           <div className="absolute bottom-4 left-4 right-4 z-40 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Protected Content: View Only - Downloading, copying, and screenshots are disabled</span>
+              <span>
+                {isTeacher 
+                  ? "Protected Content: View Only - Downloading, copying, and screenshots are disabled"
+                  : "Download and copy are disabled for this file"}
+              </span>
+            </div>
+          </div>
+        )}
+        {shouldBlockDownload && !shouldBlockCopy && (
+          <div className="absolute bottom-4 left-4 right-4 z-40 bg-amber-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Download is disabled for this file</span>
             </div>
           </div>
         )}
@@ -593,7 +729,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
         <div className="flex items-center justify-center h-full bg-slate-50">
           <div className="text-center">
             <p className="text-red-600 font-medium mb-4">{error}</p>
-            {allowDownload && (
+            {!shouldBlockDownload && (
               <a
                 href={filePath}
                 download
@@ -609,7 +745,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
 
     return (
       <div ref={containerRef} className="h-full w-full bg-white relative overflow-auto" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-        {isTeacher && (
+        {shouldBlockCopy && (
           <>
             <div
               className="absolute inset-0 z-30 pointer-events-none"
@@ -629,7 +765,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
             />
           </>
         )}
-        <div className="p-6" style={{ pointerEvents: isTeacher ? "none" : "auto", touchAction: "pan-x pan-y pinch-zoom" }}>
+        <div className="p-6" style={{ pointerEvents: "auto", touchAction: "pan-x pan-y pinch-zoom" }}>
           <div className="overflow-x-auto">
             <table 
               className="min-w-full border-collapse border border-slate-300"
@@ -652,7 +788,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
               </thead>
               <tbody>
                 {fileContent && fileContent.slice(1).map((row, rowIndex) => (
-                  <tr key={rowIndex} className={isTeacher ? "" : "hover:bg-slate-50"}>
+                  <tr key={rowIndex} className={shouldBlockCopy ? "" : "hover:bg-slate-50"}>
                     {row.map((cell, cellIndex) => (
                       <td
                         key={cellIndex}
@@ -669,7 +805,7 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
           </div>
         </div>
 
-        {allowDownload && !isTeacher && (
+        {!shouldBlockDownload && (
           <div className="absolute top-4 right-4 z-20">
             <a
               href={filePath}
@@ -684,13 +820,23 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
           </div>
         )}
 
-        {isTeacher && (
+        {shouldBlockCopy && (
           <div className="absolute bottom-4 left-4 right-4 z-20 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <span>Protected Content: View Only - Downloading, copying, and screenshots are disabled</span>
+            </div>
+          </div>
+        )}
+        {shouldBlockDownload && !shouldBlockCopy && (
+          <div className="absolute bottom-4 left-4 right-4 z-20 bg-amber-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Download is disabled for this file</span>
             </div>
           </div>
         )}
@@ -704,8 +850,8 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         <p className="text-slate-600 font-medium mb-2">This file type cannot be previewed</p>
-        <p className="text-slate-500 text-sm mb-4">Supported formats: PDF, DOC, DOCX, XLS, XLSX, CSV</p>
-        {allowDownload && (
+        <p className="text-slate-500 text-sm mb-4">Supported formats: PDF, DOC, DOCX, XLS, XLSX, CSV, PPT, PPTX</p>
+        {!shouldBlockDownload && (
           <a
             href={filePath}
             download

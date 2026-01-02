@@ -197,6 +197,7 @@ function HomeContent() {
                   fileType={selectedFile.fileType}
                   allowDownload={allowDownload}
                   isTeacher={isTeacher}
+                  fileCategory={selectedFile.fileCategory}
                 />
               </div>
             </div>
