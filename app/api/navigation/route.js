@@ -14,7 +14,7 @@ export async function GET(req) {
     const modules = modulesResult.rows;
 
     // Fetch lessons for all modules
-    const lessonsQuery = "SELECT id, module_id, title, description, order_index, status FROM lessons WHERE status = 'active' ORDER BY order_index";
+    const lessonsQuery = "SELECT id, module_id, title, description, order_index, status, ppt_file_path, quiz_link FROM lessons WHERE status = 'active' ORDER BY order_index";
     const lessonsResult = await pool.query(lessonsQuery);
     const lessons = lessonsResult.rows;
 
@@ -47,6 +47,8 @@ export async function GET(req) {
                 lesson_description: lesson.description,
                 lesson_order: lesson.order_index,
                 lesson_status: lesson.status,
+                ppt_file_path: lesson.ppt_file_path,
+                quiz_link: lesson.quiz_link,
                 teacher_files: teacherFiles
                   .filter((tf) => tf.lesson_id === lesson.id)
                   .map((tf) => ({

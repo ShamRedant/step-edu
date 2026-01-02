@@ -57,6 +57,7 @@ export async function GET(req, { params }) {
     lesson.teacher_files = teacherFiles.rows;
     lesson.student_files = studentFiles.rows;
     lesson.homework_files = homeworkFiles.rows;
+    // ppt_file_path and quiz_link are already in lesson from the query
 
     return NextResponse.json({
       success: true,
@@ -83,7 +84,7 @@ export async function PUT(req, { params }) {
     }
 
     const { id } = await params;
-    const { title, description, content, order_index, status } = await req.json();
+    const { title, description, content, order_index, status, quiz_link } = await req.json();
 
     if (!title || title.trim() === "") {
       return NextResponse.json(
@@ -99,8 +100,10 @@ export async function PUT(req, { params }) {
         description = $2,
         content = $3,
         order_index = COALESCE($4, order_index),
-        status = COALESCE($5, status)
-      WHERE id = $6
+        status = COALESCE($5, status),
+        quiz_link = COALESCE($6, quiz_link),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $7
       RETURNING *
     `;
 
@@ -110,6 +113,7 @@ export async function PUT(req, { params }) {
       content?.trim() || null,
       order_index,
       status,
+      quiz_link?.trim() || null,
       id,
     ]);
 

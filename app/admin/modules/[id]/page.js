@@ -101,6 +101,7 @@ export default function ModuleDetailPage() {
     }
   };
 
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">

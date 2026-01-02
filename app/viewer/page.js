@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import PDFViewer from "@/app/components/PDFViewer";
 
-export default function ViewerPage() {
+function ViewerContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const filePath = searchParams.get("file");
@@ -100,6 +100,20 @@ export default function ViewerPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function ViewerPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen bg-slate-50">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
+      <ViewerContent />
+    </Suspense>
   );
 }
 

@@ -506,6 +506,79 @@ export default function DocumentViewer({ filePath, fileType, allowDownload = fal
     );
   }
 
+  // PowerPoint Presentations (PPT, PPTX) - Use Microsoft Office Online Viewer
+  if (fileExt === 'ppt' || fileExt === 'pptx') {
+    const viewerUrl = typeof window !== 'undefined'
+      ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(window.location.origin + filePath)}`
+      : filePath;
+    
+    return (
+      <div ref={containerRef} className="h-full w-full bg-slate-100 relative overflow-auto" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
+        {isTeacher && (
+          <>
+            <div
+              className="absolute inset-0 z-30 pointer-events-none"
+              style={{
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                MozUserSelect: "none",
+                msUserSelect: "none",
+                touchAction: "pan-x pan-y pinch-zoom",
+              }}
+            />
+            <div
+              className="absolute inset-0 z-20 pointer-events-none"
+              style={{
+                background: "repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(255,0,0,0.02) 50px, rgba(255,0,0,0.02) 100px)",
+              }}
+            />
+          </>
+        )}
+
+        <iframe
+          src={viewerUrl}
+          className="w-full h-full border-0"
+          style={{
+            pointerEvents: "auto",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            overflow: "auto",
+            touchAction: "pan-x pan-y pinch-zoom",
+          }}
+          sandbox={isTeacher ? "allow-same-origin allow-scripts" : "allow-same-origin allow-scripts"}
+          title="PowerPoint Presentation Viewer"
+          onContextMenu={(e) => isTeacher && e.preventDefault()}
+        />
+
+        {allowDownload && !isTeacher && (
+          <div className="absolute top-4 right-4 z-20">
+            <a
+              href={filePath}
+              download
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download
+            </a>
+          </div>
+        )}
+
+        {isTeacher && (
+          <div className="absolute bottom-4 left-4 right-4 z-40 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Protected Content: View Only - Downloading, copying, and screenshots are disabled</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (fileExt === 'csv') {
     if (loading) {
       return (

@@ -96,7 +96,8 @@ export async function PUT(req, { params }) {
         title = $1, 
         description = $2, 
         order_index = COALESCE($3, order_index),
-        status = COALESCE($4, status)
+        status = COALESCE($4, status),
+        updated_at = CURRENT_TIMESTAMP
       WHERE id = $5
       RETURNING *
     `;

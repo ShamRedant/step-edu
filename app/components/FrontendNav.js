@@ -191,13 +191,66 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                         {/* Files */}
                         {lessonExpanded && (
                           <div className="ml-4 mt-1 space-y-1">
+                            {/* PPT File */}
+                            <div className="ml-2">
+                              {sidebarOpen && (
+                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">PPT File</div>
+                              )}
+                              {lesson.ppt_file_path ? (
+                                <button
+                                  onClick={() => {
+                                    const fileName = lesson.ppt_file_path.split('/').pop() || 'Presentation';
+                                    handleFileClick(lesson.ppt_file_path, 'ppt', fileName, 'ppt');
+                                  }}
+                                  className="w-full flex items-center gap-2 px-4 py-1.5 rounded hover:bg-slate-700 transition-colors text-xs text-slate-300"
+                                >
+                                  <svg className="w-3 h-3 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                  </svg>
+                                  {sidebarOpen && (
+                                    <span className="truncate flex-1 text-left">PPT Presentation</span>
+                                  )}
+                                </button>
+                              ) : (
+                                sidebarOpen && (
+                                  <div className="px-4 py-1.5 text-xs text-slate-500 italic">No PPT file</div>
+                                )
+                              )}
+                            </div>
+
+                            {/* Quiz Link */}
+                            <div className="ml-2">
+                              {sidebarOpen && (
+                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Quiz Link</div>
+                              )}
+                              {lesson.quiz_link ? (
+                                <a
+                                  href={lesson.quiz_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-full flex items-center gap-2 px-4 py-1.5 rounded hover:bg-slate-700 transition-colors text-xs text-slate-300"
+                                >
+                                  <svg className="w-3 h-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                  </svg>
+                                  {sidebarOpen && (
+                                    <span className="truncate flex-1 text-left">Take Quiz</span>
+                                  )}
+                                </a>
+                              ) : (
+                                sidebarOpen && (
+                                  <div className="px-4 py-1.5 text-xs text-slate-500 italic">No quiz link</div>
+                                )
+                              )}
+                            </div>
+
                             {/* Teacher Files */}
-                            {teacherFiles.length > 0 && (
-                              <div className="ml-2">
-                                {sidebarOpen && (
-                                  <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Teacher Files</div>
-                                )}
-                                {teacherFiles.map((file) => (
+                            <div className="ml-2">
+                              {sidebarOpen && (
+                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Teacher Files</div>
+                              )}
+                              {teacherFiles.length > 0 ? (
+                                teacherFiles.map((file) => (
                                   <button
                                     key={file.id}
                                     onClick={() =>
@@ -212,17 +265,21 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                                       <span className="truncate flex-1 text-left">{file.file_name}</span>
                                     )}
                                   </button>
-                                ))}
-                              </div>
-                            )}
+                                ))
+                              ) : (
+                                sidebarOpen && (
+                                  <div className="px-4 py-1.5 text-xs text-slate-500 italic">No teacher files</div>
+                                )
+                              )}
+                            </div>
 
                             {/* Student Files */}
-                            {studentFiles.length > 0 && (
-                              <div className="ml-2">
-                                {sidebarOpen && (
-                                  <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Student Files</div>
-                                )}
-                                {studentFiles.map((file) => (
+                            <div className="ml-2">
+                              {sidebarOpen && (
+                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Student Files</div>
+                              )}
+                              {studentFiles.length > 0 ? (
+                                studentFiles.map((file) => (
                                   <button
                                     key={file.id}
                                     onClick={() =>
@@ -237,17 +294,21 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                                       <span className="truncate flex-1 text-left">{file.file_name}</span>
                                     )}
                                   </button>
-                                ))}
-                              </div>
-                            )}
+                                ))
+                              ) : (
+                                sidebarOpen && (
+                                  <div className="px-4 py-1.5 text-xs text-slate-500 italic">No student files</div>
+                                )
+                              )}
+                            </div>
 
                             {/* Homework Files */}
-                            {homeworkFiles.length > 0 && (
-                              <div className="ml-2">
-                                {sidebarOpen && (
-                                  <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Homework Files</div>
-                                )}
-                                {homeworkFiles.map((file) => (
+                            <div className="ml-2">
+                              {sidebarOpen && (
+                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Homework Files</div>
+                              )}
+                              {homeworkFiles.length > 0 ? (
+                                homeworkFiles.map((file) => (
                                   <button
                                     key={file.id}
                                     onClick={() =>
@@ -262,9 +323,13 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                                       <span className="truncate flex-1 text-left">{file.file_name}</span>
                                     )}
                                   </button>
-                                ))}
-                              </div>
-                            )}
+                                ))
+                              ) : (
+                                sidebarOpen && (
+                                  <div className="px-4 py-1.5 text-xs text-slate-500 italic">No homework files</div>
+                                )
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
