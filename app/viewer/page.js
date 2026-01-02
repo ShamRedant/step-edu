@@ -56,33 +56,33 @@ function ViewerContent() {
   return (
     <div className="h-screen w-full flex flex-col bg-white">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 shadow-sm flex-shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex-1 min-w-0">
             <button
               onClick={() => router.push("/")}
-              className="text-blue-600 hover:text-blue-700 mb-2 inline-flex items-center gap-2"
+              className="text-blue-600 hover:text-blue-700 mb-2 inline-flex items-center gap-2 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back to Home
             </button>
-            <h1 className="text-2xl font-bold text-slate-800">{fileName}</h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 truncate">{fileName}</h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               {fileCategory === "teacher" && "Teacher File - View Only"}
               {fileCategory === "student" && "Student File - View & Download"}
               {fileCategory === "homework" && "Homework File - View & Download"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {fileCategory === "teacher" && (
-              <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+              <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full whitespace-nowrap">
                 Protected
               </span>
             )}
             {(fileCategory === "student" || fileCategory === "homework") && (
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+              <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full whitespace-nowrap">
                 Downloadable
               </span>
             )}

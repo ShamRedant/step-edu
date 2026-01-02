@@ -46,24 +46,24 @@ function ViewerContent() {
   return (
     <div className="h-screen w-full flex flex-col bg-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">{fileName}</h1>
-            <p className="text-sm text-gray-500 mt-1">
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 shadow-sm flex-shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 truncate">{fileName}</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
               {fileCategory === "teacher" && "Teacher File - View Only"}
               {fileCategory === "student" && "Student File - View & Download"}
               {fileCategory === "homework" && "Homework File - View & Download"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {fileCategory === "teacher" && (
-              <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+              <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full whitespace-nowrap">
                 Protected
               </span>
             )}
             {(fileCategory === "student" || fileCategory === "homework") && (
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+              <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full whitespace-nowrap">
                 Downloadable
               </span>
             )}
