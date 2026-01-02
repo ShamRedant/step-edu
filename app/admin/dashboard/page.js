@@ -140,7 +140,7 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+        <h2 className="text-2xl font-bold text-[#fff] mb-6">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {quickActions.map((action, index) => (
             <Link
@@ -160,7 +160,7 @@ export default function Dashboard() {
 
       {/* Recent Activity Placeholder */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">System Overview</h2>
+        <h2 className="text-2xl font-bold text-[#fff] mb-4">System Overview</h2>
         <div className="space-y-4">
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">

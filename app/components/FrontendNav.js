@@ -194,7 +194,7 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                             {/* PPT File */}
                             <div className="ml-2">
                               {sidebarOpen && (
-                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">PPT File</div>
+                                <div className="px-2 py-1 text-xs text-[#fff] font-semibold">PPT File</div>
                               )}
                               {lesson.ppt_file_path ? (
                                 <button
@@ -221,7 +221,7 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                             {/* Quiz Link */}
                             <div className="ml-2">
                               {sidebarOpen && (
-                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Quiz Link</div>
+                                <div className="px-2 py-1 text-xs text-[#fff] font-semibold">Quiz Link</div>
                               )}
                               {lesson.quiz_link ? (
                                 <a
@@ -247,7 +247,7 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                             {/* Teacher Files */}
                             <div className="ml-2">
                               {sidebarOpen && (
-                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Teacher Files</div>
+                                <div className="px-2 py-1 text-xs text-[#fff] font-semibold">Teacher Files</div>
                               )}
                               {teacherFiles.length > 0 ? (
                                 teacherFiles.map((file) => (
@@ -268,7 +268,7 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                                 ))
                               ) : (
                                 sidebarOpen && (
-                                  <div className="px-4 py-1.5 text-xs text-slate-500 italic">No teacher files</div>
+                                  <div className="px-4 py-1.5 text-xs text-[#fff] italic">No teacher files</div>
                                 )
                               )}
                             </div>
@@ -276,7 +276,7 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                             {/* Student Files */}
                             <div className="ml-2">
                               {sidebarOpen && (
-                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Student Files</div>
+                                <div className="px-2 py-1 text-xs text-[#fff] font-semibold">Student Files</div>
                               )}
                               {studentFiles.length > 0 ? (
                                 studentFiles.map((file) => (
@@ -305,7 +305,7 @@ export default function FrontendNav({ sidebarOpen, onFileSelect }) {
                             {/* Homework Files */}
                             <div className="ml-2">
                               {sidebarOpen && (
-                                <div className="px-2 py-1 text-xs text-slate-400 font-semibold">Homework Files</div>
+                                <div className="px-2 py-1 text-xs text-[#fff] font-semibold">Homework Files</div>
                               )}
                               {homeworkFiles.length > 0 ? (
                                 homeworkFiles.map((file) => (

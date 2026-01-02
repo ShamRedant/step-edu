@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import FrontendNav from "@/app/components/FrontendNav";
 import PDFViewer from "@/app/components/PDFViewer";
+import Image from "next/image"
 
 function HomeContent() {
   const router = useRouter();
@@ -37,7 +38,7 @@ function HomeContent() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex">
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white transition-all duration-300 z-50 flex flex-col ${
+        className={`fixed top-0 left-0 h-full bg-[#8a8a8a] from-slate-900 via-slate-800 to-slate-900 text-white transition-all duration-300 z-50 flex flex-col ${
           sidebarOpen ? "w-64" : "w-20"
         }`}
       >
@@ -45,13 +46,15 @@ function HomeContent() {
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <div className={`flex items-center gap-3 ${sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Steps Robotics
-          </h1>
+               <Image
+      src="/logo.png"   
+      alt="Steps Robotics"
+      width={160}
+      height={40}
+      className="object-contain"
+      priority
+    />
           </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -78,7 +81,7 @@ function HomeContent() {
           {/* Hierarchical Navigation */}
           <div className="mt-4 border-t border-slate-700 pt-4 flex-1 overflow-hidden">
             {sidebarOpen && (
-              <div className="text-xs text-slate-400 font-semibold px-4 mb-2">Course Structure</div>
+              <div className="text-xs text-[#fff] font-semibold px-4 mb-2">Course Structure</div>
             )}
             <FrontendNav 
               sidebarOpen={sidebarOpen} 
